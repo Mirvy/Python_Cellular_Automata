@@ -67,6 +67,8 @@ if __name__ == '__main__':
 		keys = pygame.key.get_pressed()
 		if keys[pygame.K_ESCAPE]:
 			sys.exit()
+		if generation > 70:
+			generation = 0
 		render_grid(screen,grid,generation,GRID_SIZE)
 		generation += 1
 		temp_grid = generate_grid(GRID_LENGTH)
@@ -74,4 +76,4 @@ if __name__ == '__main__':
 			temp_grid[i] = process_cell(grid,i)
 		grid = temp_grid
 		pygame.display.flip()
-		pygame.time.wait(30)
+		#pygame.time.wait(1)

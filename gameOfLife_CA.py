@@ -51,102 +51,12 @@ def render_grid(surface,grid,size=10):
 #Calculates immediate neighbor count; edges will wrap to
 #	opposing sides.
 def find_neighbors(grid,row,col):
-	count = 0
-	#Within the Field
-	if 0 < row < len(grid)-1 and 0 < col < len(grid)-1:
-		if grid[row+1][col+1] == 1: count +=1
-		if grid[row][col+1]   == 1: count +=1
-		if grid[row-1][col+1] == 1: count +=1
-		if grid[row+1][col]   == 1: count +=1
-		if grid[row-1][col]   == 1: count +=1
-		if grid[row+1][col-1] == 1: count +=1
-		if grid[row][col-1]   == 1: count +=1
-		if grid[row-1][col-1] == 1: count +=1
-	#Top Side...
-	elif row == 0:
-		#Top Left Corner.
-		if col == 0:
-			if grid[len(grid)-1][col+1]       == 1: count +=1
-			if grid[row][col+1]               == 1: count +=1
-			if grid[row+1][col+1]             == 1: count +=1
-			if grid[len(grid)-1][col]         == 1: count +=1
-			if grid[row+1][col]               == 1: count +=1
-			if grid[len(grid)-1][len(grid)-1] == 1: count +=1
-			if grid[row][len(grid)-1]         == 1: count +=1
-			if grid[row+1][len(grid)-1]       == 1: count +=1
-		#Top Right Corner.
-		elif col == len(grid)-1:
-			if grid[len(grid)-1][col-1]  == 1: count +=1
-			if grid[row][col-1]          == 1: count +=1
-			if grid[row+1][col-1]        == 1: count +=1
-			if grid[len(grid)-1][col]    == 1: count +=1
-			if grid[row+1][col]          == 1: count +=1
-			if grid[len(grid)-1][0]      == 1: count +=1
-			if grid[row][0]              == 1: count +=1
-			if grid[row+1][0]            == 1: count +=1
-		#Along the Top Edge.
-		else:
-			if grid[row+1][col+1]       == 1: count +=1
-			if grid[row][col+1]         == 1: count +=1
-			if grid[len(grid)-1][col+1] == 1: count +=1
-			if grid[row+1][col]         == 1: count +=1
-			if grid[len(grid)-1][col]   == 1: count +=1
-			if grid[row+1][col-1]       == 1: count +=1
-			if grid[row][col-1]         == 1: count +=1
-			if grid[len(grid)-1][col-1] == 1: count +=1
-	#The Bottom Side...
-	elif row == len(grid)-1:
-		#Bottom Left Corner.
-		if col == 0:
-			if grid[0][col+1]           == 1: count +=1
-			if grid[row][col+1]         == 1: count +=1
-			if grid[row-1][col+1]       == 1: count +=1
-			if grid[0][col]             == 1: count +=1
-			if grid[row-1][col]         == 1: count +=1
-			if grid[0][len(grid)-1]     == 1: count +=1
-			if grid[row][len(grid)-1]   == 1: count +=1
-			if grid[row-1][len(grid)-1] == 1: count +=1
-		#Bottom Right Corner.
-		elif col == len(grid)-1:
-			if grid[0][0]         == 1: count +=1
-			if grid[row][0]       == 1: count +=1
-			if grid[row-1][0]     == 1: count +=1
-			if grid[0][col]       == 1: count +=1
-			if grid[row-1][col]   == 1: count +=1
-			if grid[0][col-1]     == 1: count +=1
-			if grid[row][col-1]   == 1: count +=1
-			if grid[row-1][col-1] == 1: count +=1
-		#Along the Bottom Edge.
-		else:
-			if grid[0][col-1]     == 1: count +=1
-			if grid[row][col-1]   == 1: count +=1
-			if grid[row-1][col-1] == 1: count +=1
-			if grid[0][col]       == 1: count +=1
-			if grid[row-1][col]   == 1: count +=1
-			if grid[0][col+1]     == 1: count +=1
-			if grid[row][col+1]   == 1: count +=1
-			if grid[row-1][col+1] == 1: count +=1
-	#Along the Left Edge.
-	elif col == 0:
-		if grid[row+1][col+1]       == 1: count +=1
-		if grid[row][col+1]         == 1: count +=1
-		if grid[row-1][col+1]       == 1: count +=1
-		if grid[row+1][col]         == 1: count +=1
-		if grid[row-1][col]         == 1: count +=1
-		if grid[row+1][len(grid)-1] == 1: count +=1
-		if grid[row][len(grid)-1]   == 1: count +=1
-		if grid[row-1][len(grid)-1] == 1: count +=1
-	#Along the Right Edge:
-	elif col == len(grid)-1:
-		if grid[row+1][0]     == 1: count +=1
-		if grid[row][0]       == 1: count +=1
-		if grid[row-1][0]     == 1: count +=1
-		if grid[row+1][col]   == 1: count +=1
-		if grid[row-1][col]   == 1: count +=1
-		if grid[row+1][col-1] == 1: count +=1
-		if grid[row][col-1]   == 1: count +=1
-		if grid[row-1][col-1] == 1: count +=1
-	return count
+	adjacent = []
+	for dx in (-1,0,1):
+		for dy in (-1,0,1):
+			if dx != 0 or dy != 0:
+				adjacent.append([(row+dy)%len(grid),(col+dx)%len(grid)])
+	return adjacent
 
 #Determines the next generation for a given cell based on
 #	its current state, and its neighbor count.
@@ -287,34 +197,17 @@ if __name__ == '__main__':
 			pos = pygame.mouse.get_pos()
 			row = pos[1] // GRID_SIZE
 			col = pos[0] // GRID_SIZE
-			if row == 0: row = 1
-			if row == len(grid)-1: row = row - 1
-			if col == 0: col = 1
-			if col == len(grid)-1: col = col - 1
-			print('row:%d , col: %d'%(row,col))
-			grid[row][col]     = 1
-			grid[row][col+1]   = 1
-			grid[row][col-1]   = 1
-			grid[row+1][col]   = 1
-			grid[row+1][col+1] = 1
-			grid[row+1][col-1] = 1
-			grid[row-1][col]   = 1
-			grid[row-1][col+1] = 1
-			grid[row-1][col-1] = 1
+			adjacent = find_neighbors(grid,row,col)
+			for adj in adjacent:
+				grid[adj[0]][adj[1]] = 1
+
 		if pygame.mouse.get_pressed()[2]:
 			pos = pygame.mouse.get_pos()
 			row = pos[1] // GRID_SIZE
 			col = pos[0] // GRID_SIZE
-			print('row:%d , col: %d'%(row,col))
-			grid[row][col]     = 0
-			grid[row][col+1]   = 0
-			grid[row][col-1]   = 0
-			grid[row+1][col]   = 0
-			grid[row+1][col+1] = 0
-			grid[row+1][col-1] = 0
-			grid[row-1][col]   = 0
-			grid[row-1][col+1] = 0
-			grid[row-1][col-1] = 0
+			adjacent = find_neighbors(grid,row,col)
+			for adj in adjacent:
+				grid[adj[0]][adj[1]] = 0
 			
 #Track the current population as the current grid
 #	cells are analyzed for the next generation.
@@ -322,7 +215,11 @@ if __name__ == '__main__':
 		for i in range(GRID_LENGTH):
 			for j in range(GRID_LENGTH):
 				neighbors = find_neighbors(grid,i,j)
-				next_gen = process_cell(grid[i][j],neighbors)
+				count = 0
+				for k in neighbors:
+					if grid[k[0]][k[1]] == 1:
+						count += 1
+				next_gen = process_cell(grid[i][j],count)
 				temp_grid[i][j] = next_gen
 				if next_gen == 1:
 					population += 1

@@ -1,4 +1,4 @@
-import pygame, sys, random
+import pygame, sys, random, math
 from os import system, name
 from typing import List, Callable
 
@@ -48,14 +48,99 @@ def render_grid(surface,grid,size=10):
 				size-2)
 			)
 
-#Calculates immediate neighbor count; excluding the edges
-#	for simplicity.
+#Calculates immediate neighbor count; edges will wrap to
+#	opposing sides.
 def find_neighbors(grid,row,col):
 	count = 0
+	#Within the Field
 	if 0 < row < len(grid)-1 and 0 < col < len(grid)-1:
 		if grid[row+1][col+1] == 1: count +=1
 		if grid[row][col+1]   == 1: count +=1
 		if grid[row-1][col+1] == 1: count +=1
+		if grid[row+1][col]   == 1: count +=1
+		if grid[row-1][col]   == 1: count +=1
+		if grid[row+1][col-1] == 1: count +=1
+		if grid[row][col-1]   == 1: count +=1
+		if grid[row-1][col-1] == 1: count +=1
+	#Top Side...
+	elif row == 0:
+		#Top Left Corner.
+		if col == 0:
+			if grid[len(grid)-1][col+1]       == 1: count +=1
+			if grid[row][col+1]               == 1: count +=1
+			if grid[row+1][col+1]             == 1: count +=1
+			if grid[len(grid)-1][col]         == 1: count +=1
+			if grid[row+1][col]               == 1: count +=1
+			if grid[len(grid)-1][len(grid)-1] == 1: count +=1
+			if grid[row][len(grid)-1]         == 1: count +=1
+			if grid[row+1][len(grid)-1]       == 1: count +=1
+		#Top Right Corner.
+		elif col == len(grid)-1:
+			if grid[len(grid)-1][col-1]  == 1: count +=1
+			if grid[row][col-1]          == 1: count +=1
+			if grid[row+1][col-1]        == 1: count +=1
+			if grid[len(grid)-1][col]    == 1: count +=1
+			if grid[row+1][col]          == 1: count +=1
+			if grid[len(grid)-1][0]      == 1: count +=1
+			if grid[row][0]              == 1: count +=1
+			if grid[row+1][0]            == 1: count +=1
+		#Along the Top Edge.
+		else:
+			if grid[row+1][col+1]       == 1: count +=1
+			if grid[row][col+1]         == 1: count +=1
+			if grid[len(grid)-1][col+1] == 1: count +=1
+			if grid[row+1][col]         == 1: count +=1
+			if grid[len(grid)-1][col]   == 1: count +=1
+			if grid[row+1][col-1]       == 1: count +=1
+			if grid[row][col-1]         == 1: count +=1
+			if grid[len(grid)-1][col-1] == 1: count +=1
+	#The Bottom Side...
+	elif row == len(grid)-1:
+		#Bottom Left Corner.
+		if col == 0:
+			if grid[0][col+1]           == 1: count +=1
+			if grid[row][col+1]         == 1: count +=1
+			if grid[row-1][col+1]       == 1: count +=1
+			if grid[0][col]             == 1: count +=1
+			if grid[row-1][col]         == 1: count +=1
+			if grid[0][len(grid)-1]     == 1: count +=1
+			if grid[row][len(grid)-1]   == 1: count +=1
+			if grid[row-1][len(grid)-1] == 1: count +=1
+		#Bottom Right Corner.
+		elif col == len(grid)-1:
+			if grid[0][0]         == 1: count +=1
+			if grid[row][0]       == 1: count +=1
+			if grid[row-1][0]     == 1: count +=1
+			if grid[0][col]       == 1: count +=1
+			if grid[row-1][col]   == 1: count +=1
+			if grid[0][col-1]     == 1: count +=1
+			if grid[row][col-1]   == 1: count +=1
+			if grid[row-1][col-1] == 1: count +=1
+		#Along the Bottom Edge.
+		else:
+			if grid[0][col-1]     == 1: count +=1
+			if grid[row][col-1]   == 1: count +=1
+			if grid[row-1][col-1] == 1: count +=1
+			if grid[0][col]       == 1: count +=1
+			if grid[row-1][col]   == 1: count +=1
+			if grid[0][col+1]     == 1: count +=1
+			if grid[row][col+1]   == 1: count +=1
+			if grid[row-1][col+1] == 1: count +=1
+	#Along the Left Edge.
+	elif col == 0:
+		if grid[row+1][col+1]       == 1: count +=1
+		if grid[row][col+1]         == 1: count +=1
+		if grid[row-1][col+1]       == 1: count +=1
+		if grid[row+1][col]         == 1: count +=1
+		if grid[row-1][col]         == 1: count +=1
+		if grid[row+1][len(grid)-1] == 1: count +=1
+		if grid[row][len(grid)-1]   == 1: count +=1
+		if grid[row-1][len(grid)-1] == 1: count +=1
+	#Along the Right Edge:
+	elif col == len(grid)-1:
+		if grid[row+1][0]     == 1: count +=1
+		if grid[row][0]       == 1: count +=1
+		if grid[row-1][0]     == 1: count +=1
 		if grid[row+1][col]   == 1: count +=1
 		if grid[row-1][col]   == 1: count +=1
 		if grid[row+1][col-1] == 1: count +=1
@@ -85,42 +170,42 @@ def clear():
 #	different initial states for the grid.
 #--Static(nonchanging)--
 def pattern_block(grid):
-	grid[GRID_LENGTH//2][GRID_LENGTH//2] = 1
-	grid[GRID_LENGTH//2][(GRID_LENGTH//2)+1] = 1
-	grid[(GRID_LENGTH//2)+1][GRID_LENGTH//2] = 1
+	grid[GRID_LENGTH//2][GRID_LENGTH//2]         = 1
+	grid[GRID_LENGTH//2][(GRID_LENGTH//2)+1]     = 1
+	grid[(GRID_LENGTH//2)+1][GRID_LENGTH//2]     = 1
 	grid[(GRID_LENGTH//2)+1][(GRID_LENGTH//2)+1] = 1
 	return grid
 	
 def pattern_loaf(grid):
-	grid[(GRID_LENGTH//2)-1][GRID_LENGTH//2] = 1
+	grid[(GRID_LENGTH//2)-1][GRID_LENGTH//2]     = 1
 	grid[(GRID_LENGTH//2)-1][(GRID_LENGTH//2)-1] = 1
-	grid[GRID_LENGTH//2][(GRID_LENGTH//2)-2] = 1
-	grid[GRID_LENGTH//2][(GRID_LENGTH//2)+1] = 1
+	grid[GRID_LENGTH//2][(GRID_LENGTH//2)-2]     = 1
+	grid[GRID_LENGTH//2][(GRID_LENGTH//2)+1]     = 1
 	grid[(GRID_LENGTH//2)+1][(GRID_LENGTH//2)-1] = 1
 	grid[(GRID_LENGTH//2)+1][(GRID_LENGTH//2)+1] = 1
-	grid[(GRID_LENGTH//2)+2][GRID_LENGTH//2] = 1
+	grid[(GRID_LENGTH//2)+2][GRID_LENGTH//2]     = 1
 	return grid
 	
 #--Oscillating(repeating pattern)--
 def pattern_blinker(grid):
-	grid[GRID_LENGTH//2][GRID_LENGTH//2] = 1
+	grid[GRID_LENGTH//2][GRID_LENGTH//2]     = 1
 	grid[(GRID_LENGTH//2)+1][GRID_LENGTH//2] = 1
 	grid[(GRID_LENGTH//2)-1][GRID_LENGTH//2] = 1
 	return grid
 	
 def pattern_toad(grid):
-	grid[GRID_LENGTH//2][GRID_LENGTH//2] = 1
-	grid[(GRID_LENGTH//2)+1][GRID_LENGTH//2] = 1
+	grid[GRID_LENGTH//2][GRID_LENGTH//2]         = 1
+	grid[(GRID_LENGTH//2)+1][GRID_LENGTH//2]     = 1
 	grid[(GRID_LENGTH//2)+1][(GRID_LENGTH//2)-1] = 1
 	grid[(GRID_LENGTH//2)+1][(GRID_LENGTH//2)+1] = 1
-	grid[GRID_LENGTH//2][(GRID_LENGTH//2)+1] = 1
-	grid[GRID_LENGTH//2][(GRID_LENGTH//2)+2] = 1
+	grid[GRID_LENGTH//2][(GRID_LENGTH//2)+1]     = 1
+	grid[GRID_LENGTH//2][(GRID_LENGTH//2)+2]     = 1
 	return grid
 	
 def pattern_beacon(grid):
-	grid[(GRID_LENGTH//2)-1][GRID_LENGTH//2] = 1
+	grid[(GRID_LENGTH//2)-1][GRID_LENGTH//2]     = 1
 	grid[(GRID_LENGTH//2)-1][(GRID_LENGTH//2)-1] = 1
-	grid[GRID_LENGTH//2][(GRID_LENGTH//2)-1] = 1
+	grid[GRID_LENGTH//2][(GRID_LENGTH//2)-1]     = 1
 	grid[(GRID_LENGTH//2)+1][(GRID_LENGTH//2)+2] = 1
 	grid[(GRID_LENGTH//2)+2][(GRID_LENGTH//2)+2] = 1
 	grid[(GRID_LENGTH//2)+2][(GRID_LENGTH//2)+1] = 1
@@ -128,18 +213,18 @@ def pattern_beacon(grid):
 	
 #--Mobile(simulates motion)--
 def pattern_glider(grid):
-	grid[(GRID_LENGTH//2)+1][GRID_LENGTH//2] = 1
+	grid[(GRID_LENGTH//2)+1][GRID_LENGTH//2]     = 1
 	grid[(GRID_LENGTH//2)+1][(GRID_LENGTH//2)+1] = 1
-	grid[GRID_LENGTH//2][(GRID_LENGTH//2)+1] = 1
-	grid[GRID_LENGTH//2][(GRID_LENGTH//2)-1] = 1
+	grid[GRID_LENGTH//2][(GRID_LENGTH//2)+1]     = 1
+	grid[GRID_LENGTH//2][(GRID_LENGTH//2)-1]     = 1
 	grid[(GRID_LENGTH//2)-1][(GRID_LENGTH//2)+1] = 1
 	return grid
 
 def pattern_spaceship(grid):
-	grid[GRID_LENGTH//2][GRID_LENGTH//2] = 1
-	grid[GRID_LENGTH//2][(GRID_LENGTH//2)-1] = 1
-	grid[GRID_LENGTH//2][(GRID_LENGTH//2)+1] = 1
-	grid[GRID_LENGTH//2][(GRID_LENGTH//2)+2] = 1
+	grid[GRID_LENGTH//2][GRID_LENGTH//2]         = 1
+	grid[GRID_LENGTH//2][(GRID_LENGTH//2)-1]     = 1
+	grid[GRID_LENGTH//2][(GRID_LENGTH//2)+1]     = 1
+	grid[GRID_LENGTH//2][(GRID_LENGTH//2)+2]     = 1
 	grid[(GRID_LENGTH//2)-1][(GRID_LENGTH//2)+2] = 1
 	grid[(GRID_LENGTH//2)-1][(GRID_LENGTH//2)-2] = 1
 	grid[(GRID_LENGTH//2)-2][(GRID_LENGTH//2)+2] = 1
@@ -159,22 +244,22 @@ def pattern_empty(grid):
 	return grid
 	
 #Parameters for grid and screen size
-GRID_LENGTH = 109
-GRID_SIZE = 8
-SCREEN_WIDTH = GRID_LENGTH*(GRID_SIZE)
+GRID_LENGTH   = 109
+GRID_SIZE     = 8
+SCREEN_WIDTH  = GRID_LENGTH*(GRID_SIZE)
 SCREEN_HEIGHT = SCREEN_WIDTH
 	
 	
 if __name__ == '__main__':
 #Initializations for Pygame elements and screen
 	pygame.init()
-	size = SCREEN_WIDTH,SCREEN_HEIGHT
+	size   = SCREEN_WIDTH,SCREEN_HEIGHT
 	screen = pygame.display.set_mode(size)
 	
 #Produce two lists to act as a double buffer which
 #	will alternate, rather than constantly making new
 #	lists.
-	grid = generate_grid(GRID_LENGTH,pattern_random)	
+	grid      = generate_grid(GRID_LENGTH,pattern_random)	
 	temp_grid = generate_grid(GRID_LENGTH,pattern_empty)
 	
 #Initialise the screen to black
@@ -202,14 +287,18 @@ if __name__ == '__main__':
 			pos = pygame.mouse.get_pos()
 			row = pos[1] // GRID_SIZE
 			col = pos[0] // GRID_SIZE
+			if row == 0: row = 1
+			if row == len(grid)-1: row = row - 1
+			if col == 0: col = 1
+			if col == len(grid)-1: col = col - 1
 			print('row:%d , col: %d'%(row,col))
-			grid[row][col] = 1
-			grid[row][col+1] = 1
-			grid[row][col-1] = 1
-			grid[row+1][col] = 1
+			grid[row][col]     = 1
+			grid[row][col+1]   = 1
+			grid[row][col-1]   = 1
+			grid[row+1][col]   = 1
 			grid[row+1][col+1] = 1
 			grid[row+1][col-1] = 1
-			grid[row-1][col] = 1
+			grid[row-1][col]   = 1
 			grid[row-1][col+1] = 1
 			grid[row-1][col-1] = 1
 		if pygame.mouse.get_pressed()[2]:

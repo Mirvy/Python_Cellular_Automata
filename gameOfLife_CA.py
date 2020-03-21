@@ -30,7 +30,7 @@ def render_grid(surface,grid,size=10):
 				colors['white'],
 				pygame.Rect(
 					(size*j),
-					size+(i*size),
+					(i*size),
 					size-(size//5),
 					size)
 				)
@@ -170,6 +170,34 @@ if __name__ == '__main__':
 		if keys[pygame.K_ESCAPE]:
 			sys.exit()
 		render_grid(screen,grid,GRID_SIZE)
+		if pygame.mouse.get_pressed()[0]:
+			pos = pygame.mouse.get_pos()
+			row = pos[1] // GRID_SIZE
+			col = pos[0] // GRID_SIZE
+			print('row:%d , col: %d'%(row,col))
+			grid[row][col] = 1
+			grid[row][col+1] = 1
+			grid[row][col-1] = 1
+			grid[row+1][col] = 1
+			grid[row+1][col+1] = 1
+			grid[row+1][col-1] = 1
+			grid[row-1][col] = 1
+			grid[row-1][col+1] = 1
+			grid[row-1][col-1] = 1
+		if pygame.mouse.get_pressed()[2]:
+			pos = pygame.mouse.get_pos()
+			row = pos[1] // GRID_SIZE
+			col = pos[0] // GRID_SIZE
+			print('row:%d , col: %d'%(row,col))
+			grid[row][col]     = 0
+			grid[row][col+1]   = 0
+			grid[row][col-1]   = 0
+			grid[row+1][col]   = 0
+			grid[row+1][col+1] = 0
+			grid[row+1][col-1] = 0
+			grid[row-1][col]   = 0
+			grid[row-1][col+1] = 0
+			grid[row-1][col-1] = 0
 		population = 0
 		for i in range(GRID_LENGTH):
 			for j in range(GRID_LENGTH):
@@ -182,7 +210,6 @@ if __name__ == '__main__':
 		grid = temp_grid
 		temp_grid = temp
 		pygame.display.flip()
-		print('Current Population: %d',population)
+		print('Current Population: ',population)
 
-		#pygame.time.wait(60)
 		

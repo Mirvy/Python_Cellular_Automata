@@ -1,4 +1,5 @@
 import pygame, sys, random
+from os import system, name
 
 colors = {
 	'black'  : (0, 0, 0),
@@ -62,6 +63,15 @@ def process_cell(cell_state,neighbor_count):
 	if cell_state == 0 and neighbor_count == 3:
 		return 1
 	return cell_state
+	
+#Format helper function
+def clear():
+	if name == 'nt':
+	#for windows
+		_ = system('cls')
+	#for mac and linux
+	else:
+		_ = system('clear')
 	
 #Pattern Initialization Callbacks
 #Static
@@ -140,10 +150,10 @@ def pattern_empty(grid):
 	return grid
 	
 #Parameters
-GRID_LENGTH = 63
-GRID_SIZE = 14
-SCREEN_WIDTH = 1024
-SCREEN_HEIGHT = 768
+GRID_LENGTH = 109
+GRID_SIZE = 8
+SCREEN_WIDTH = GRID_LENGTH*(GRID_SIZE)
+SCREEN_HEIGHT = SCREEN_WIDTH
 	
 	
 if __name__ == '__main__':
@@ -151,7 +161,7 @@ if __name__ == '__main__':
 	size = SCREEN_WIDTH,SCREEN_HEIGHT
 	screen = pygame.display.set_mode(size)
 	grid = generate_grid(GRID_LENGTH,pattern_random)	
-	
+	temp_grid = generate_grid(GRID_LENGTH,pattern_empty)
 	screen.fill(colors['black'])
 	while True:
 		for event in pygame.event.get():
@@ -160,14 +170,19 @@ if __name__ == '__main__':
 		if keys[pygame.K_ESCAPE]:
 			sys.exit()
 		render_grid(screen,grid,GRID_SIZE)
-		temp_grid = generate_grid(GRID_LENGTH,pattern_empty)
+		population = 0
 		for i in range(GRID_LENGTH):
 			for j in range(GRID_LENGTH):
 				neighbors = find_neighbors(grid,i,j)
-				print('row:%d ,col:%d ,neighbour_count:%d'%(i,j,neighbors))
-				temp_grid[i][j] = process_cell(grid[i][j],neighbors)
+				next_gen = process_cell(grid[i][j],neighbors)
+				temp_grid[i][j] = next_gen
+				if next_gen == 1:
+					population += 1
+		temp = grid
 		grid = temp_grid
+		temp_grid = temp
 		pygame.display.flip()
-		print(grid[GRID_LENGTH-1][0])
+		print('Current Population: %d',population)
+
 		#pygame.time.wait(60)
 		

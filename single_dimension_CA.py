@@ -9,9 +9,21 @@ colors = {
 	'yellow' : (221, 242, 8)
 }
 
+states = {
+	'000': 0,
+	'001': 1,
+	'010': 0,
+	'011': 1,
+	'100': 1,
+	'101': 0,
+	'110': 1,
+	'111': 0
+	}
+
 def generate_grid(size):
-	grid = [0 for x in range(size)]
-	grid[size//2] = 1
+	#grid = [0 for x in range(size)]
+	#grid[size//2] = 1
+	grid = [random.randint(0,1) for x in range(size)]
 	return grid
 	
 def render_grid(surface,grid,generation=0,size=10):
@@ -23,23 +35,13 @@ def render_grid(surface,grid,generation=0,size=10):
 		pygame.draw.rect(surface,colors['white'],pygame.Rect((size*i),size+(generation*size),size-(size//5),size))
 		pygame.draw.rect(surface,color,pygame.Rect((size*i)+1,(generation*size)+1,size-(size//5)-2,size-2))
 
-def process_cell(grid,index):
-	states = {
-		'000': 0,
-		'001': 1,
-		'010': 0,
-		'011': 1,
-		'100': 1,
-		'101': 0,
-		'110': 1,
-		'111': 0
-	}
+def process_cell(grid,index,states):
 	if index == 0:
-		left = 1
+		left = 0
 		right = grid[index+1]
 	elif index == len(grid)-1:
 		left = grid[index-1]
-		right = 1
+		right = 0
 	else:
 		left = grid[index-1]
 		right = grid[index+1]
@@ -47,8 +49,8 @@ def process_cell(grid,index):
 	return states[state]
 	
 #Parameters
-GRID_LENGTH = 99
-GRID_SIZE = 10
+GRID_LENGTH = 1023
+GRID_SIZE = 1
 SCREEN_WIDTH = 1024
 SCREEN_HEIGHT = 768
 	
@@ -67,13 +69,14 @@ if __name__ == '__main__':
 		keys = pygame.key.get_pressed()
 		if keys[pygame.K_ESCAPE]:
 			sys.exit()
-		if generation > 70:
+		if generation > SCREEN_HEIGHT:
 			generation = 0
+			#grid[random.randint(0,GRID_LENGTH-1)] = 1
 		render_grid(screen,grid,generation,GRID_SIZE)
 		generation += 1
 		temp_grid = generate_grid(GRID_LENGTH)
 		for i in range(GRID_LENGTH):
-			temp_grid[i] = process_cell(grid,i)
+			temp_grid[i] = process_cell(grid,i,states)
 		grid = temp_grid
 		pygame.display.flip()
-		#pygame.time.wait(1)
+		pygame.time.wait(5)

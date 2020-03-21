@@ -154,8 +154,8 @@ def pattern_empty(grid):
 	return grid
 	
 #Parameters for grid and screen size
-GRID_LENGTH   = 109
-GRID_SIZE     = 8
+GRID_LENGTH   = 80
+GRID_SIZE     = 10
 SCREEN_WIDTH  = GRID_LENGTH*(GRID_SIZE)
 SCREEN_HEIGHT = SCREEN_WIDTH
 	

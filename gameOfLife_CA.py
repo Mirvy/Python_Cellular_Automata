@@ -48,6 +48,23 @@ def render_grid(surface,grid,size=10):
 				size-2)
 			)
 
+def render_info(surface,screen_width,info):
+	default_font = pygame.font.get_default_font()
+	font = pygame.font.Font(default_font,30)
+	font_surface = font.render("Population: %d"%info,False,colors['white'])
+	info_rect = surface.blit(
+		font_surface,
+		(0,screen_width+1)
+	)
+	pygame.draw.line(
+		surface,
+		colors['white'],
+		(0,screen_width),
+		(screen_width,screen_width)
+	)
+	return info_rect
+	
+			
 #Calculates immediate neighbor count; edges will wrap to
 #	opposing sides.
 def find_neighbors(grid,row,col):
@@ -157,7 +174,7 @@ def pattern_empty(grid):
 GRID_LENGTH   = 80
 GRID_SIZE     = 10
 SCREEN_WIDTH  = GRID_LENGTH*(GRID_SIZE)
-SCREEN_HEIGHT = SCREEN_WIDTH
+SCREEN_HEIGHT = SCREEN_WIDTH + (SCREEN_WIDTH//10)
 	
 	
 if __name__ == '__main__':
@@ -224,6 +241,9 @@ if __name__ == '__main__':
 				if next_gen == 1:
 					population += 1
 					
+#Render the current population count
+		info_rect = render_info(screen,SCREEN_WIDTH,population)
+					
 #Swap the list buffers
 		temp = grid
 		grid = temp_grid
@@ -231,6 +251,6 @@ if __name__ == '__main__':
 		
 #Display the next fram, and print the current population.
 		pygame.display.flip()
-		print('Current Population: ',population)
+		pygame.draw.rect(screen,colors['black'],info_rect)
 
 		
